@@ -8,8 +8,8 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "python-telegram-bot[job-queue] (>=22.6,<23.0)",
     "priceapi @ file:///Users/hieu/uriel/onboard/02_backend/priceapi",
-    "python-telegram-bot (>=22.6,<23.0)"
 ]
 
 [tool.poetry]
