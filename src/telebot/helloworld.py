@@ -1,5 +1,6 @@
 import argparse
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
+from operator import call
 import sys
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
@@ -21,9 +22,11 @@ async def send_a_message(context: ContextTypes.DEFAULT_TYPE) -> None:
 	begin_time = datetime.now()
 
 	try:
-		result = duys_strategy()
+		query_time = begin_time - timedelta(seconds=begin_time.second + 1, microseconds=begin_time.microsecond)
+		result = duys_strategy(end_time = query_time)
 		message = f"""
-			Time: {result["time"]}
+			Time: {datetime.now().strftime("%H:%M:%S.%f")}
+			Frame: {result["time"]}
 			Closed price: {result["price"]}
 			Coef: {result["coef"]}
 		"""
@@ -40,7 +43,17 @@ async def send_continously(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 	await update.message.reply_text(text = 'Welcome to the Bot')
 	assert update.effective_chat is not None
 	chat_id = update.effective_chat.id
-	tmp = context.job_queue.run_repeating(callback = send_a_message, interval = 5, chat_id=chat_id)
+
+	context.job_queue.run_once(callback=send_a_message, chat_id=chat_id, when=datetime.now())
+	
+	now = datetime.now()
+	seconds = now.second + now.microsecond / 1000000
+	context.job_queue.run_repeating(
+		callback = send_a_message,
+		interval = 60,
+		chat_id = chat_id,
+		first =  60 - seconds
+	)
 
 def main() -> None:
 	cred_token = get_cred()
