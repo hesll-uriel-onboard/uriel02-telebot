@@ -19,14 +19,17 @@ def get_cred() -> str:
 
 async def send_a_message(context: ContextTypes.DEFAULT_TYPE) -> None:
 	begin_time = datetime.now()
-	
-	result = duys_strategy()
-	message = f"""
-		Time: {result["time"]}
-		Closed price: {result["price"]}
-		Coef: {result["coef"]}
-	"""
-	
+
+	try:
+		result = duys_strategy()
+		message = f"""
+			Time: {result["time"]}
+			Closed price: {result["price"]}
+			Coef: {result["coef"]}
+		"""
+	except:
+		message = "Failed to retrieve information from Binance"
+
 	chat_id = context.job.chat_id
 	if chat_id is not None:
 		end_time = datetime.now() - begin_time
@@ -34,10 +37,10 @@ async def send_a_message(context: ContextTypes.DEFAULT_TYPE) -> None:
 		await context.bot.sendMessage(chat_id = chat_id, text = message)
 
 async def send_continously(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-	await update.message.reply_text(text = 'Hello World')
+	await update.message.reply_text(text = 'Welcome to the Bot')
 	assert update.effective_chat is not None
 	chat_id = update.effective_chat.id
-	tmp = context.job_queue.run_repeating(callback = send_a_message, interval = 30, chat_id=chat_id)
+	tmp = context.job_queue.run_repeating(callback = send_a_message, interval = 5, chat_id=chat_id)
 
 def main() -> None:
 	cred_token = get_cred()
